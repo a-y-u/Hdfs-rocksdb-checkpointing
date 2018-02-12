@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <move file="/home/ayushi/work/apps/dedupapp/target/dedupapp-1.0-SNAPSHOT-apexapp.jar" tofile="/home/ayushi/work/apps/dedupapp/target/dedupapp-1.0-SNAPSHOT.apa"/>
+</target>
+</project>
