@@ -29,11 +29,10 @@ public class RandomNumberGenerator extends BaseOperator implements InputOperator
     Tuple tuple = new Tuple();
     System.out.println(" tuple " + tuple.getSite_id() + " " + tuple.getPage_id() + " " + tuple.getClient_id() + " " + tuple.getAmount());
     try {
-      sleep(1000);
+      sleep(1000/numTuples);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-
 
     out.emit(tuple);
 

@@ -1,21 +1,4 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+
 package com.datatorrent.example.dedupapp;
 
 
@@ -23,9 +6,15 @@ import com.datatorrent.api.Context.OperatorContext;
 import com.datatorrent.api.DefaultInputPort;
 import com.datatorrent.api.DefaultOutputPort;
 import com.datatorrent.common.util.BaseOperator;
+import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import org.apache.commons.io.FileUtils;
 import org.rocksdb.*;
 import org.rocksdb.Options;
+import org.rocksdb.BackupEngine;
+import org.rocksdb.BackupableDBOptions;
+import org.rocksdb.Env;
+import org.rocksdb.util.Environment;
+import org.rocksdb.RocksObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datatorrent.api.Operator.CheckpointNotificationListener;
@@ -42,7 +31,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class RocksDBOutputOperator extends BaseOperator implements CheckpointNotificationListener  {
+import static com.datatorrent.common.util.FSStorageAgent.kryo;
+
+public class RocksDBOutputOperator extends BaseOperator implements CheckpointNotificationListener {
     private boolean sendPerTuple = true;
     private static transient Logger logger = LoggerFactory.getLogger(RocksDBOutputOperator.class);
     public final transient DefaultOutputPort<String> output  = new DefaultOutputPort<>();
@@ -52,11 +43,13 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
 
     Checkpoint checkpoint;
     CheckpointNotificationListener checkpointListener;
+    BackupEngine backupEngine;
+    Env env ;
 
     int count = 1 ;
 
     public static Path getAllFilePathhdfs(Path filePath, FileSystem fs) throws FileNotFoundException, IOException {
-       // will return the latest file in HDFS
+        // will return the latest file in HDFS
         List<String> fileList = new ArrayList<String>();
         FileStatus[] fileStatus = fs.listStatus(filePath);
         long max_modified=0;
@@ -112,7 +105,7 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
         byte[] buffer = new byte[1024];
 
         for(File file : fileList) {
-            if(!file.getName().endsWith(".zip"))
+            if(!(file.getName().endsWith(".zip")||file.getName().startsWith("LOG.old.")))
             //skip zipping .zip file to avoid recursion
             {
                 System.out.println(file.getName());
@@ -164,7 +157,7 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
     public void unzip(String zipFilePath, String destDirectory) throws IOException {
         File destDir = new File(destDirectory);
         if (!destDir.exists()) {
-            destDir.mkdir();
+            destDir.mkdir();      //Db did not exist after restarting hence create
         }
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
         ZipEntry entry = zipIn.getNextEntry();
@@ -187,17 +180,21 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
     public void beforeCheckpoint(long windowId) {
 
         logger.info("   Before Checkpoint {} ,{}",db.getSnapshot(),windowId);
-
+        FileSystem hdfs = null;
         try {
-
-            deposit(); //zipping db and pushing into hdfs
-            RocksIterator ri=db.newIterator();
-            int i=0;
-            for (ri.seekToFirst();ri.isValid();ri.next()){
-                i++;
-            }
-            logger.info("number of keys of "+" : "+i);
+            hdfs =FileSystem.get(new Configuration());
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            System.out.println("giving path");
+            //backupableDBOptions =new BackupableDBOptions("/tmp/rocks");
+
+            System.out.println("path given");
+
+            backupEngine.createNewBackup(db,true);
+            System.out.println("created backup");
+        } catch (RocksDBException e) {
             e.printStackTrace();
         }
 
@@ -209,12 +206,10 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
     public void setup(OperatorContext context) {
 
         File index = new File("/tmp/db");
-        if(index.exists())
-        { // if /tmp/db path already exists
+        if (index.exists()) { // if /tmp/db path already exists
 
             String[] entries = index.list();
-            if (entries.length != 0)
-            { // if there are files inside /tmp/db
+            if (entries.length != 0) { // if there are files inside /tmp/db
                 for (String s : entries) {
                     //deleting each file inside it as you cant delete a directory with content inside it
                     File currentFile = new File(index.getPath(), s);
@@ -228,78 +223,34 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
                 e.printStackTrace();
             }
         }
-        boolean exists= false;
-        long fileCount=0;
-        Path pt = null;
-        FileSystem hdfs = null;
-        ContentSummary cs;
-        try { //if /tmp/rocksbackup already exists, counting the total no of files in tmp/rocskbackup in hdfs
-            hdfs =FileSystem.get(new Configuration());
-            pt = new Path(hdfs.getHomeDirectory()+"/tmp/rocksbackup");
-            exists=hdfs.exists(pt);
-            if(exists){
-                cs = hdfs.getContentSummary(pt);
-                fileCount = cs.getFileCount();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if(exists==false){
-            // /tmp/rocksbackup/ is created
-            try {
-                boolean made = hdfs.mkdirs(pt);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
 
         RocksDB.loadLibrary();
 
-        if(fileCount!=0){
-
-            Path hdfsFile = null;
+        File index1=new File("/tmp/rocks");
+        if (index1.exists()) {
             try {
-                hdfsFile = getAllFilePathhdfs(pt,hdfs); // to return the latest file in HDFS
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Path p = new Path(pt+"/"+hdfsFile.getName()); //HDFS path
-
-            Path inLocal =new Path("/tmp");//Local system path
-
-
-            try {
-                hdfs.copyToLocalFile(p,inLocal); //copying from HDFS to local
-                unzip("/tmp/"+hdfsFile.getName(),"/tmp/db"); //unziping the required file in local
-
-
-                //after unzipping,delete the zip file
-                Path del = new Path("/tmp/"+hdfsFile.getName());
-                File index2 = new File(String.valueOf(del));
-                System.out.println("/tmp/"+hdfsFile.getName());
-                index2.delete();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-            try {
+                index.mkdirs();
+                RestoreOptions restoreOptions = new RestoreOptions(true);
+                //this.env=options.getEnv();
+                System.out.println("inside if loop ");
+                BackupableDBOptions backupableDBOptions;
+                backupableDBOptions =new BackupableDBOptions("/tmp/rocks");
+                //BackupEngine backupEngine;
+                this.backupEngine = backupEngine.open(env,backupableDBOptions);
+                backupEngine.restoreDbFromLatestBackup("/tmp/db", "/tmp/db", restoreOptions);
                 db = RocksDB.open(dbpath); //after the system restarts,opening the DB
+                System.out.println("db opened in if loop");
             } catch (RocksDBException e) {
                 e.printStackTrace();
+                System.out.println(e);
             }
             //start the checkpoint count from the no retrieved from the latest file unzipped
-            count = Integer.parseInt(hdfsFile.getName().replaceAll("\\D+",""));
+            //count = Integer.parseInt(hdfsFile.getName().replaceAll("\\D+",""));
 
         }
 
         else {
             //creating /temp/db
-
 
             File file = new File(dbpath);
             file.mkdirs();
@@ -308,11 +259,16 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
             try (final Options options = new Options().setCreateIfMissing(true).setWriteBufferSize(5096)) {
                 db = RocksDB.open(options, dbpath);
                 logger.info("DB created {}", db);
-
+                this.env=options.getEnv();
+                index1.mkdirs();
+                BackupableDBOptions backupableDBOptions;
+                backupableDBOptions =new BackupableDBOptions("/tmp/rocks");
+                this.backupEngine = backupEngine.open(env,backupableDBOptions);
             } catch (RocksDBException e) {
                 throw new RuntimeException("Exception in opening rocksdb", e);
             }
         }
+
     }
 
     public static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
@@ -404,8 +360,24 @@ public class RocksDBOutputOperator extends BaseOperator implements CheckpointNot
 
     @Override
     public void committed(long l) {
+        FileSystem hdfs = null;
+        try {
+            hdfs = FileSystem.get(new Configuration());
+            Path homeDir=hdfs.getHomeDirectory();
+            Path newFolderPath=new Path(String.valueOf(homeDir)+"/tmp/rocksbackup"+"/checkpoint_"+(count-3)+".zip");
+            hdfs.delete(newFolderPath,true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            backupEngine.purgeOldBackups(5);
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+        }
+
 
     }
 }
-
 
