@@ -4,4 +4,3 @@ com/datatorrent/example/dedupapp/RocksDBOutputOperator$1.class
 com/datatorrent/example/dedupapp/RocksDbStore.class
 com/datatorrent/example/dedupapp/RandomNumberGenerator.class
 com/datatorrent/example/dedupapp/Tuple.class
-com/datatorrent/example/dedupapp/RocksDBOutputOperator$2.class
