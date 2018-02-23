@@ -12,13 +12,13 @@ import com.datatorrent.common.util.BaseOperator;
 import static java.lang.Thread.sleep;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class RandomNumberGenerator extends BaseOperator implements InputOperator
+public class AdDataGenerator extends BaseOperator implements InputOperator
 {
-  private static final Logger LOG = getLogger(RandomNumberGenerator.class);
+  private static final Logger LOG = getLogger(AdDataGenerator.class);
   private int numTuples = 100;
   private transient int count = 0;
 
-  public final transient DefaultOutputPort<Tuple> out = new DefaultOutputPort<Tuple>();
+  public final transient DefaultOutputPort<AdData> out = new DefaultOutputPort<AdData>();
 
   @Override
   public void beginWindow(long windowId)
@@ -29,8 +29,8 @@ public class RandomNumberGenerator extends BaseOperator implements InputOperator
   @Override
   public void emitTuples()
   {
-    Tuple tuple = new Tuple();
-    LOG.trace("Tuple {} {} {} {}", tuple.getSite_id(), tuple.getPage_id(), tuple.getClient_id(), tuple.getAmount());
+    AdData tuple = new AdData();
+    LOG.trace("AdData {} {} {} {}", tuple.getSite_id(), tuple.getPage_id(), tuple.getClient_id(), tuple.getAmount());
     try {
       sleep(1000 / numTuples);
     } catch (InterruptedException e) {

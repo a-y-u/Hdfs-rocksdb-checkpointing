@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Random;
 
-public class Tuple implements Serializable
+public class AdData implements Serializable
 {
 
   public int getAmount()
@@ -34,7 +34,7 @@ public class Tuple implements Serializable
   private int client_id, site_id, page_id, amount;
   Random r = new Random();
 
-  public Tuple()
+  public AdData()
   {
     setSiteid();
     setClientid();

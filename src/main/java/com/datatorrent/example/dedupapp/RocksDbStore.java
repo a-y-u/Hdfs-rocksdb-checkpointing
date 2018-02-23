@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,7 +29,7 @@ public class RocksDbStore
   private static final int BUFFER_SIZE = 4096;
   String hdfspath;
   private transient RocksDB db;
-  private static transient Logger logger = LoggerFactory.getLogger(RocksDBOutputOperator.class);
+  private static transient Logger logger = LoggerFactory.getLogger(AdDataDeduper.class);
 
   public void setHdfspath(String s)
   {
@@ -206,8 +205,6 @@ public class RocksDbStore
 
   RocksDB loadFromHDSFile(FileSystem hdfs, Path hdfsFilePpth) throws IOException, RocksDBException
   {
-
-
     String fileName = hdfsFilePpth.getName();
     Path inLocal = new Path(dbpath);//Local system path
     hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
@@ -241,4 +238,19 @@ public class RocksDbStore
       db.close();
     }
   }
+
+  public void deleteOlderCheckpoints(long operatorId, long windowId) throws IOException
+  {
+    FileSystem hdfs = FileSystem.get(new Configuration());
+    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
+      Long.toString(operatorId));
+    FileStatus[] files = hdfs.listStatus(hdfsBackupPath);
+    for (FileStatus file : files) {
+      long wid = getWidFromFilePath(file);
+      if (wid < windowId) {
+        hdfs.delete(file.getPath());
+      }
+    }
+  }
+
 }
