@@ -3,13 +3,11 @@ package com.datatorrent.example.dedupapp;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.datatorrent.api.annotation.ApplicationAnnotation;
-import com.datatorrent.api.StreamingApplication;
 import com.datatorrent.api.DAG;
-import com.datatorrent.api.DAG.Locality;
-import com.datatorrent.lib.io.ConsoleOutputOperator;
+import com.datatorrent.api.StreamingApplication;
+import com.datatorrent.api.annotation.ApplicationAnnotation;
 
-@ApplicationAnnotation(name="MyFirstApplication")
+@ApplicationAnnotation(name = "MyFirstApplication")
 public class Application implements StreamingApplication
 {
 

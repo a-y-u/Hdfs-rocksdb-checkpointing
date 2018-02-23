@@ -1,37 +1,44 @@
 <?xml version="1.0"?>
 <configuration>
-  <!-- 
-  <property>
-    <name>apex.application.{appName}.operator.{opName}.prop.{propName}</name>
-    <value>some-default-value (if value is not specified, it is required from the user or custom config when launching)</value>
-  </property>
-  -->
-  <!-- memory assigned to app master
-  <property>
-    <name>apex.attr.MASTER_MEMORY_MB</name>
-    <value>1024</value>
-  </property>
-  -->
+
   <property>
     <name>apex.application.MyFirstApplication.operator.randomGenerator.prop.numTuples</name>
     <value>1000</value>
   </property>
+
   <property>
     <name>dt.attr.MASTER_MEMORY_MB</name>
     <value>1024</value>
   </property>
 
+  <property>
+    <name>dt.operator.*.port.*.attr.BUFFER_MEMORY_MB</name>
+    <value>0</value>
+  </property>
 
-  <!-- Memory for all operators -->
   <property>
     <name>dt.application.*.operator.*.attr.MEMORY_MB</name>
     <value>512</value>
   </property>
 
-  <!-- Memory for buffer server -->
   <property>
     <name>dt.application.MyFirstApplication.operator.*.port.*.attr.BUFFER_MEMORY_MB</name>
     <value>512</value>
+  </property>
+
+  <property>
+    <name>dt.attr.CONTAINER_JVM_OPTIONS</name>
+    <value>-Xloggc:&lt;LOG_DIR&gt;/gc.log -verbose:gc -XX:+PrintGCDateStamps -Djava.specification.version=1.7</value>
+  </property>
+
+  <property>
+    <name>dt.operator.rocksdb.attr.PARTITIONER</name>
+    <value>com.datatorrent.common.partitioner.StatelessPartitioner:2</value>
+  </property>
+
+  <property>
+    <name>dt.operator.randomGenerator.attr.PARTITIONER</name>
+    <value>com.datatorrent.common.partitioner.StatelessPartitioner:2</value>
   </property>
 
 </configuration>
