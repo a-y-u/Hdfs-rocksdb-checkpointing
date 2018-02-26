@@ -2,7 +2,63 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="806e7820-54c2-4397-8830-70c147f171be" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java" afterPath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java" afterPath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java" afterPath="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java" />
+      <change beforePath="$PROJECT_DIR$/target/antrun/build-main.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/properties.xml" afterPath="$PROJECT_DIR$/target/classes/META-INF/properties.xml" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/datatorrent/example/dedupapp/Application.class" afterPath="$PROJECT_DIR$/target/classes/com/datatorrent/example/dedupapp/Application.class" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/datatorrent/example/dedupapp/RocksDbStore.class" afterPath="$PROJECT_DIR$/target/classes/com/datatorrent/example/dedupapp/RocksDbStore.class" />
+      <change beforePath="$PROJECT_DIR$/target/classes/dedupapp-1.0-SNAPSHOT-javadoc.xml" afterPath="$PROJECT_DIR$/target/classes/dedupapp-1.0-SNAPSHOT-javadoc.xml" />
+      <change beforePath="$PROJECT_DIR$/target/dedupapp-1.0-SNAPSHOT.apa" afterPath="$PROJECT_DIR$/target/dedupapp-1.0-SNAPSHOT.apa" />
+      <change beforePath="$PROJECT_DIR$/target/dedupapp-1.0-SNAPSHOT.jar" afterPath="$PROJECT_DIR$/target/dedupapp-1.0-SNAPSHOT.jar" />
+      <change beforePath="$PROJECT_DIR$/target/deps/activation-1.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/activemq-client-5.8.0.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/apex-shaded-ning19-1.0.0.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/aws-java-sdk-core-1.10.73.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/aws-java-sdk-kms-1.10.73.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/aws-java-sdk-s3-1.10.73.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/commons-beanutils-1.9.2.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/commons-collections-3.2.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/commons-compiler-2.7.8.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/commons-lang3-3.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/commons-logging-1.1.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/fastutil-7.0.6.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/geronimo-j2ee-management_1.1_spec-1.0.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/geronimo-jms_1.1_spec-1.1.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/hawtbuf-1.9.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/httpclient-4.3.6.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/httpcore-4.3.3.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jackson-annotations-2.5.0.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jackson-core-2.5.4.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jackson-databind-2.5.4.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jackson-dataformat-cbor-2.5.3.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/javax.mail-1.5.0.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jersey-client-1.9.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jersey-core-1.9.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-continuation-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-http-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-io-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-security-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-server-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-servlet-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-util-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jetty-websocket-8.1.10.v20130312.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jms-api-1.1-rev-1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/joda-time-2.9.1.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/jooq-3.6.4.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/malhar-library-3.8.0.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/named-regexp-0.2.3.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/rocksdbjni-5.9.2.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/deps/slf4j-api-1.7.5.jar" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/generated-resources/xml-javadoc/dedupapp-1.0-SNAPSHOT-javadoc.xml" afterPath="$PROJECT_DIR$/target/generated-resources/xml-javadoc/dedupapp-1.0-SNAPSHOT-javadoc.xml" />
+      <change beforePath="$PROJECT_DIR$/target/javadoc-bundle-options/javadoc-options-javadoc-resources.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/log4j.properties" afterPath="" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,11 +73,9 @@
       <file leaf-file-name="Application.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="468">
+            <state relative-caret-position="196">
               <caret line="35" column="74" lean-forward="false" selection-start-line="35" selection-start-column="74" selection-end-line="35" selection-end-column="74" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -36,10 +90,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AggregationOperator.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="AggregationOperator.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/AggregationOperator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
+            <state relative-caret-position="360">
               <caret line="34" column="8" lean-forward="false" selection-start-line="34" selection-start-column="8" selection-end-line="34" selection-end-column="8" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -103,17 +157,17 @@
       <file leaf-file-name="AdsGeneratorOperator.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="954">
-              <caret line="66" column="57" lean-forward="false" selection-start-line="66" selection-start-column="57" selection-end-line="66" selection-end-column="57" />
+            <state relative-caret-position="-1149">
+              <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DedupOperator.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DedupOperator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
+            <state relative-caret-position="-1007">
               <caret line="22" column="2" lean-forward="false" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="90" />
               <folding />
             </state>
@@ -168,13 +222,13 @@
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/RocksDbStore.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/UniqueOperator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/JsonConverter1.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/JsonConverterUnique.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/JsonConverter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/JsonConverterDuplicate.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/AggregationOperator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java" />
       </list>
     </option>
   </component>
@@ -218,7 +272,10 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -309,9 +366,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
-      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -589,6 +643,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="75" y="16" width="1303" height="780" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.102643855" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -602,7 +657,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.427907" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26055777" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26932272" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24940239" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -662,9 +717,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="26" column="57" lean-forward="false" selection-start-line="26" selection-start-column="57" selection-end-line="26" selection-end-column="57" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -698,9 +751,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -727,9 +778,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
           <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -834,14 +883,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="954">
-          <caret line="66" column="57" lean-forward="false" selection-start-line="66" selection-start-column="57" selection-end-line="66" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/AdDataGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -854,14 +895,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2394">
           <caret line="156" column="0" lean-forward="false" selection-start-line="156" selection-start-column="0" selection-end-line="156" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="22" column="2" lean-forward="false" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="90" />
           <folding />
         </state>
       </provider>
@@ -884,23 +917,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/AggregationOperator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="35" column="74" lean-forward="false" selection-start-line="35" selection-start-column="74" selection-end-line="35" selection-end-column="74" />
+        <state relative-caret-position="360">
+          <caret line="34" column="8" lean-forward="false" selection-start-line="34" selection-start-column="8" selection-end-line="34" selection-end-column="8" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/AggregationOperator.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/ads/AdsGeneratorOperator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="34" column="8" lean-forward="false" selection-start-line="34" selection-start-column="8" selection-end-line="34" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="-1149">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/dedupapp/Application.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="35" column="74" lean-forward="false" selection-start-line="35" selection-start-column="74" selection-end-line="35" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/datatorrent/example/operators/DedupOperator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1007">
+          <caret line="22" column="2" lean-forward="false" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="90" />
+          <folding />
         </state>
       </provider>
     </entry>
