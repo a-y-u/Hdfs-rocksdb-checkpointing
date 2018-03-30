@@ -12,7 +12,7 @@ import com.datatorrent.api.annotation.ApplicationAnnotation;
 import com.datatorrent.example.ads.AdsGeneratorOperator;
 import com.datatorrent.example.operators.JsonConverterDuplicate;
 
-@ApplicationAnnotation(name = "MyFirstApplication")
+@ApplicationAnnotation(name = "DedupApplication")
 public class Application implements StreamingApplication
 {
   @Override

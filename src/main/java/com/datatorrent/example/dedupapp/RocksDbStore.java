@@ -12,6 +12,7 @@ import java.util.zip.ZipOutputStream;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import org.apache.hadoop.fs.Path;
 
 import com.datatorrent.api.Context;
 
+
 public class RocksDbStore
 {
 
@@ -30,7 +32,8 @@ public class RocksDbStore
   String hdfspath;
   private transient RocksDB db;
   private static transient Logger logger = LoggerFactory.getLogger(AdDataDeduper.class);
-
+  RocksIterator ri;
+  int count=0;
   public void setHdfspath(String s)
   {
     this.hdfspath = (s);
@@ -70,8 +73,10 @@ public class RocksDbStore
     byte[] buffer = new byte[1024];
 
     for (File file : fileList) {
-      System.out.println(file.getName());
-      ZipEntry e = new ZipEntry(String.valueOf(file));
+      System.out.println("file name ?"+file.getName());
+
+      ZipEntry e = new ZipEntry(String.valueOf(file.getName())); //to get only file
+
       out.putNextEntry(e);  //zipping each file inside db
       FileInputStream in = new FileInputStream(file);
       int len;
@@ -98,6 +103,7 @@ public class RocksDbStore
     int read = 0;
     while ((read = zipIn.read(bytesIn)) != -1) {
       bos.write(bytesIn, 0, read);
+      System.out.println("actual extracting n reading the file");
     }
     bos.close();
   }
@@ -113,14 +119,17 @@ public class RocksDbStore
     ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
     ZipEntry entry = zipIn.getNextEntry();
     while (entry != null) {
-      String filePath = destDirectory + entry.getName();
+      String filePath = destDirectory + "/"+entry.getName();
+      //String filePath = destDirectory;
       System.out.println("inside while loop: " + filePath);
       if (!entry.isDirectory()) {
         System.out.println("inside if loop");
         File f = new File(filePath);
-        if (f.exists()) {
+       /* if (f.exists()) {
+          System.out.println("If f exists");
           extractFile(zipIn, f);
-        }
+        }*/
+        extractFile(zipIn, f);
       }
 
       System.out.println("entry : " + entry.getName());
@@ -156,13 +165,17 @@ public class RocksDbStore
       exists = hdfs.exists(hdfsBackupPath);
 
       if (!exists) {
+        logger.info("New DB created (SHOULD NEVER HAPPEN(ONLY ONCE))");
         return createFreshDB();
       }
 
+
+
       long ac = context.getValue(Context.OperatorContext.ACTIVATION_WINDOW_ID);
       Path p = new Path(hdfsBackupPath, "checkpoint_" + ac + ".zip");
-      logger.debug("Activation checkpoint file path {}", p);
+      logger.info("Activation checkpoint file path {}", p);
       if (hdfs.exists(p)) {
+
         return loadFromHDSFile(hdfs, p);
       } else {
         FileStatus[] files = hdfs.listStatus(hdfsBackupPath);
@@ -180,7 +193,9 @@ public class RocksDbStore
             }
           }
         }
+        logger.info("latestFile value {}",latestFile);
         if (latestFile == null) {
+          logger.info("New DB created ");
           return createFreshDB();
         } else {
           logger.info("latest checkpoint path is {}", latestFile);
@@ -192,6 +207,9 @@ public class RocksDbStore
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+
+
     return db;
   }
 
@@ -208,14 +226,25 @@ public class RocksDbStore
     String fileName = hdfsFilePpth.getName();
     Path inLocal = new Path(dbpath);//Local system path
     hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
+    logger.info("Copied from hdfs to local {} ");
+    logger.info("inLOCal path {} ",inLocal);
     unzip(inLocal + "/" + fileName, inLocal.toString()); //unziping the required file in local
 
     //after unzipping,delete the zip file
     Path del = new Path(dbpath + "/" + fileName);
     File index2 = new File(String.valueOf(del));
+    logger.info("");
     index2.delete();
 
-    db = RocksDB.open(dbpath); //opening the DB after the system restarts
+    db = RocksDB.open(dbpath);//opening the DB after the system restarts
+    /*ri=db.newIterator();
+    ri.
+    for(ri.seekToFirst();ri.isValid();ri.next())
+    count++;
+
+    System.out.println("number of keys :"+count);
+*/
+
     return db;
   }
 

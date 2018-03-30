@@ -23,12 +23,25 @@ public class AdInfoGenerator {
     private static final Random rand = new Random();
     private static final ObjectMapper mapper = new ObjectMapper();
 
+
+    public AdInfoGenerator() throws IOException, JSONException {
+        advetisers = loadResource("advertisers.txt");
+        List<String> publishersLines = loadResource("publishers.txt");
+        for (String line : publishersLines) {
+            JSONObject json = new JSONObject(line);
+            String publisherName = json.getString("publisher");
+            publishersNames.add(publisherName);
+            publishers.put(publisherName, getArray(json.getJSONArray("domains")));
+        }
+    }
+    
     /**
      * Return list of lines are a list from resource file.
      * @param fileName
      * @return
      * @throws IOException
      */
+
     protected List<String> loadResource(String fileName) throws IOException
     {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
@@ -63,17 +76,6 @@ public class AdInfoGenerator {
             ret.add(arr.getString(i));
         }
         return ret;
-    }
-
-    public AdInfoGenerator() throws IOException, JSONException {
-        advetisers = loadResource("advertisers.txt");
-        List<String> publishersLines = loadResource("publishers.txt");
-        for (String line : publishersLines) {
-            JSONObject json = new JSONObject(line);
-            String publisherName = json.getString("publisher");
-            publishersNames.add(publisherName);
-            publishers.put(publisherName, getArray(json.getJSONArray("domains")));
-        }
     }
 
     public AdInfo generateRecord()
