@@ -41,5 +41,20 @@
     <value>com.datatorrent.common.partitioner.StatelessPartitioner:2</value>
   </property>
 
+  <property>
+    <name>dt.operator.Store.attr.MEMORY_MB</name>
+    <value>8096</value>
+  </property>
+
+  <property>
+    <name>dt.attr.HEARTBEAT_TIMEOUT_MILLIS</name>
+    <value>120000</value>
+  </property>
+
+  <property>
+    <name>dt.operator.*.attr.TIMEOUT_WINDOW_COUNT</name>
+    <value>5000</value>
+  </property>
+
 </configuration>
 
