@@ -58,7 +58,7 @@ public abstract class DedupOperator extends BaseOperator implements Operator.Che
       db.put(key, EMPTY_VAL);
     } else {
       totalDedups++;
-      logger.info("Duplicate inserted");
+      logger.info("Duplicate found");
       duplicateData.emit(o);
     }
   }

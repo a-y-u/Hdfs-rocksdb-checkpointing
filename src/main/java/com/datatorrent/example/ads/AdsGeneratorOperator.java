@@ -97,7 +97,7 @@ public class AdsGeneratorOperator extends BaseOperator implements InputOperator
       return r;
     }
 
-    public K getYongest()
+    public K getYoungest()
     {
       return get(size() - 1);
     }

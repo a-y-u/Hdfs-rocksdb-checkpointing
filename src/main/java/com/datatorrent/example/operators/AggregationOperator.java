@@ -9,6 +9,7 @@ import com.datatorrent.example.ads.AdInfo;
 import com.datatorrent.example.dedupapp.RocksDbStore;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,10 +102,10 @@ public class AggregationOperator extends BaseOperator implements Operator.Checkp
     {
         super.setup(context);
         DBstore.setHdfspath("/tmp/rocksbackup/");
-       db = DBstore.setDBandFetch(context);
+        db = DBstore.setDBandFetch(context);
 
         if (db == null) {
-            throw new RuntimeException("Unable to initialize db ");
+            throw new RuntimeException("updatevalue ");
         }
         operatorId = context.getId();
 
