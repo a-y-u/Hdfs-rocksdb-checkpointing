@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 
 import com.datatorrent.api.Context;
@@ -31,12 +32,14 @@ public class RockdbStoreOperator extends BaseOperator implements Operator.Checkp
     public void process(MutableKeyValue o)
     {
       try {
-        db.put(o.getKey(), o.getValue());
+        db.put(writeOptions, o.getKey(), o.getValue());
       } catch (RocksDBException e) {
         LOG.error("Error while trying to write to rocksdb");
       }
     }
   };
+
+  private transient WriteOptions writeOptions;
 
   @Override
   public void setup(Context.OperatorContext context)
@@ -48,6 +51,8 @@ public class RockdbStoreOperator extends BaseOperator implements Operator.Checkp
       throw new RuntimeException("Unable to initialize db ");
     }
     operatorId  = context.getId();
+    writeOptions = new WriteOptions();
+    writeOptions.setDisableWAL(true);
   }
 
   @Override
@@ -77,10 +82,10 @@ public class RockdbStoreOperator extends BaseOperator implements Operator.Checkp
   @Override
   public void committed(long windowId)
   {
-    try {
-      DBstore.deleteOlderCheckpoints(operatorId, windowId);
-    } catch (IOException ex) {
-      LOG.error("Error while deleting old checkpoints {}", ex);
-    }
+//    try {
+//      DBstore.deleteOlderCheckpoints(operatorId, windowId);
+//    } catch (IOException ex) {
+//      LOG.error("Error while deleting old checkpoints {}", ex);
+//    }
   }
 }

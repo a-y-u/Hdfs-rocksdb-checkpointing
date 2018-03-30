@@ -5,6 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -16,6 +22,7 @@ import org.rocksdb.RocksIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,14 +31,17 @@ import org.apache.hadoop.fs.Path;
 import com.datatorrent.api.Context;
 
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class RocksDbStore
 {
+  private static final Logger LOG = getLogger(RocksDbStore.class);
 
   public String dbpath;
-  private static final int BUFFER_SIZE = 4096;
+  private static final int BUFFER_SIZE = 32 * 1024;
   String hdfspath;
   private transient RocksDB db;
-  private static transient Logger logger = LoggerFactory.getLogger(AdDataDeduper.class);
+  private static transient Logger logger = getLogger(AdDataDeduper.class);
   RocksIterator ri;
   int count=0;
   public void setHdfspath(String s)
@@ -48,50 +58,94 @@ public class RocksDbStore
   public static File[] getFileList(String dirPath)
   {
     File dir = new File(dirPath);
-    System.out.println(dirPath);
     File[] fileList = dir.listFiles();
-    for (File f : fileList) {
-      System.out.println(f);
-    }
     return fileList;
   }
 
   public void zipAndSend(long operatorId, long windowId) throws IOException
   {
+    List<File> newFiles = incremental_backup();
+    LOG.info("new files {}", newFiles);
+    copyFile(operatorId, windowId, newFiles);
+    //zipAndSend(operatorId, windowId, newFiles);
+  }
+
+  public void zipAndSend(long operatorId, long windowId, List<File> fileList) throws IOException
+  {
     FileSystem hdfs = FileSystem.get(new Configuration());
     Path homeDir = hdfs.getHomeDirectory();
-
 
     Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
       Long.toString(operatorId));
     Path hdfsCheckpointFilePath = new Path(hdfsBackupPath, "checkpoint_" + windowId + ".zip");
     logger.info("HDFS checkpoint file path {}", hdfsCheckpointFilePath);
-    File[] fileList = getFileList(dbpath);
 
     File localZipFile = new File(dbpath + "/checkpoint_" + windowId + ".zip");//creates a new file for checkpoint
     ZipOutputStream out = new ZipOutputStream(new FileOutputStream(localZipFile));
-    byte[] buffer = new byte[1024];
+    byte[] buffer = new byte[32 * 1024];
 
     for (File file : fileList) {
       System.out.println("file name ?"+file.getName());
-
       ZipEntry e = new ZipEntry(String.valueOf(file.getName())); //to get only file
-
       out.putNextEntry(e);  //zipping each file inside db
-      FileInputStream in = new FileInputStream(file);
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);  //writing to the zip entries else file_size=0
+      try {
+        FileInputStream in = new FileInputStream(file);
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+          out.write(buffer, 0, len);  //writing to the zip entries else file_size=0
+        }
+        in.close();
+      } catch (Exception ex) {
+        LOG.error("Ignoreing file {}", file.getName());
       }
-      in.close();
       out.closeEntry();
-
     }
     out.close();
     Path zipPath = new Path(localZipFile.getAbsolutePath());
     logger.info("copy from {} to {}", zipPath, hdfsCheckpointFilePath);
     hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
     localZipFile.delete();
+  }
+
+  Map<String, Long> fileTimeStampMap = new HashMap<>();
+
+  public List<File> incremental_backup()
+  {
+    List<File> newFiles = new ArrayList<>();
+    File[] files = getFileList(dbpath);
+    for (File file : files) {
+      Long lastTimestamp = fileTimeStampMap.get(file.getName());
+      if (lastTimestamp == null) {
+        LOG.info("new file {}", file.getName());
+        newFiles.add(file);
+        fileTimeStampMap.put(file.getName(), file.lastModified());
+        continue;
+      }
+      if (lastTimestamp < file.lastModified()) {
+        LOG.info("Modified file {}", file.getName());
+        newFiles.add(file);
+        fileTimeStampMap.put(file.getName(), file.lastModified());
+      }
+    }
+    return newFiles;
+  }
+
+  private void copyFile(long operatorId, long wid, List<File> files) throws IOException
+  {
+    FileSystem hdfs = FileSystem.get(new Configuration());
+    Path homeDir = hdfs.getHomeDirectory();
+
+    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
+      Long.toString(operatorId));
+
+    for (File file: files) {
+      try (InputStream in = new FileInputStream(file);
+        OutputStream out = hdfs.create(new Path(hdfsBackupPath, file.getName()))) {
+        IOUtils.copy(in, out);
+      } catch (Exception ex) {
+        LOG.error("Error while copying {}", ex);
+      }
+    }
   }
 
   private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
@@ -103,7 +157,6 @@ public class RocksDbStore
     int read = 0;
     while ((read = zipIn.read(bytesIn)) != -1) {
       bos.write(bytesIn, 0, read);
-      System.out.println("actual extracting n reading the file");
     }
     bos.close();
   }
@@ -215,7 +268,7 @@ public class RocksDbStore
 
   RocksDB createFreshDB() throws RocksDBException
   {
-    final Options options = new Options().setCreateIfMissing(true).setWriteBufferSize(5096);
+    final Options options = new Options().setCreateIfMissing(true).setWriteBufferSize(1024 * 1024 * 1024);
     db = RocksDB.open(options, dbpath);
     logger.info("Fresh DB created {} at path {}", db, dbpath);
     return db;
