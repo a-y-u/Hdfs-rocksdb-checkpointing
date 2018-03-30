@@ -1,4 +1,0 @@
-{ "publisher": "amazon", "domains" : [ "www.amazon.in", "www.amazon.com", "www.amazon.uk", "www.amazon.de" ]}
-{ "publisher": "ebay", "domains" : [ "www.ebay.in", "www.ebay.com", "www.ebay.uk", "www.ebay.de" ]}
-{ "publisher": "facebook", "domains" : [ "www.facebook.in", "www.facebook.com", "www.facebook.uk", "www.facebook.de" ]}
-{ "publisher": "xiaomi", "domains" : [ "www.xiaomi.in", "www.xiaomi.com", "www.xiaomi.uk", "www.xiaomi.de" ]}
