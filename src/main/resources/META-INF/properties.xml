@@ -43,7 +43,7 @@
 
   <property>
     <name>dt.operator.Store.attr.MEMORY_MB</name>
-    <value>8096</value>
+    <value>2048</value>
   </property>
 
   <property>

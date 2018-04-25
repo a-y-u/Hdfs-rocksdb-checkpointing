@@ -38,7 +38,7 @@ public class RocksDbStore
   private static final Logger LOG = getLogger(RocksDbStore.class);
 
   public String dbpath;
-  private static final int BUFFER_SIZE = 32 * 1024;
+  private static final int BUFFER_SIZE = 1024;
   String hdfspath;
   private transient RocksDB db;
   private static transient Logger logger = getLogger(AdDataDeduper.class);
@@ -67,9 +67,49 @@ public class RocksDbStore
     List<File> newFiles = incremental_backup();
     LOG.info("new files {}", newFiles);
     copyFile(operatorId, windowId, newFiles);
-    //zipAndSend(operatorId, windowId, newFiles);
+   // zipAndSend(operatorId, windowId, newFiles);//(DONT UNCOMMENT THIS)
+    //zipAndSenD(operatorId,windowId);
   }
 
+  /*public void zipAndSenD(long operatorId, long windowId) throws IOException
+  {
+    FileSystem hdfs = FileSystem.get(new Configuration());
+    Path homeDir = hdfs.getHomeDirectory();
+
+
+    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
+            Long.toString(operatorId));
+    Path hdfsCheckpointFilePath = new Path(hdfsBackupPath, "checkpoint_" + windowId + ".zip");
+    logger.info("HDFS checkpoint file path {}", hdfsCheckpointFilePath);
+    File[] fileList = getFileList(dbpath);
+
+    File localZipFile = new File(dbpath + "/checkpoint_" + windowId + ".zip");//creates a new file for checkpoint
+    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(localZipFile));
+    byte[] buffer = new byte[1024];
+
+    for (File file : fileList) {
+      System.out.println("file name ?"+file.getName());
+
+      ZipEntry e = new ZipEntry(String.valueOf(file.getName())); //to get only file
+
+      out.putNextEntry(e);  //zipping each file inside db
+      FileInputStream in = new FileInputStream(file);
+      int len;
+      while ((len = in.read(buffer)) > 0) {
+        out.write(buffer, 0, len);  //writing to the zip entries else file_size=0
+      }
+      in.close();
+      out.closeEntry();
+
+    }
+    out.close();
+    Path zipPath = new Path(localZipFile.getAbsolutePath());
+    logger.info("copy from {} to {}", zipPath, hdfsCheckpointFilePath);
+    hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
+    localZipFile.delete();
+  }
+*/
+  /*
   public void zipAndSend(long operatorId, long windowId, List<File> fileList) throws IOException
   {
     FileSystem hdfs = FileSystem.get(new Configuration());
@@ -106,7 +146,7 @@ public class RocksDbStore
     hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
     localZipFile.delete();
   }
-
+*/
   Map<String, Long> fileTimeStampMap = new HashMap<>();
 
   public List<File> incremental_backup()
@@ -148,7 +188,7 @@ public class RocksDbStore
     }
   }
 
-  private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
+  /*private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
   {
     System.out.println("in extract file path :" + filePath);
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
@@ -160,7 +200,8 @@ public class RocksDbStore
     }
     bos.close();
   }
-
+*/
+  /*
   public void unzip(String zipFilePath, String destDirectory) throws IOException
   {
     System.out.println("dest directory : " + destDirectory);
@@ -182,7 +223,7 @@ public class RocksDbStore
           System.out.println("If f exists");
           extractFile(zipIn, f);
         }*/
-        extractFile(zipIn, f);
+/*        extractFile(zipIn, f);
       }
 
       System.out.println("entry : " + entry.getName());
@@ -191,7 +232,7 @@ public class RocksDbStore
     }
     zipIn.close();
   }
-
+*/
   public String setLocalPath(Context context)
   {
 
@@ -225,11 +266,12 @@ public class RocksDbStore
 
 
       long ac = context.getValue(Context.OperatorContext.ACTIVATION_WINDOW_ID);
-      Path p = new Path(hdfsBackupPath, "checkpoint_" + ac + ".zip");
-      logger.info("Activation checkpoint file path {}", p);
-      if (hdfs.exists(p)) {
+      //Path p = new Path(hdfsBackupPath, "");
+      System.out.println("path "+hdfsBackupPath);
+      logger.info("Activation checkpoint file path {}", hdfsBackupPath);
+      if (hdfs.exists(hdfsBackupPath)) {
 
-        return loadFromHDSFile(hdfs, p);
+        return loadFromHDSFile(hdfs, hdfsBackupPath);
       } else {
         FileStatus[] files = hdfs.listStatus(hdfsBackupPath);
         Path latestFile = null;
@@ -268,7 +310,7 @@ public class RocksDbStore
 
   RocksDB createFreshDB() throws RocksDBException
   {
-    final Options options = new Options().setCreateIfMissing(true).setWriteBufferSize(1024 * 1024 * 1024);
+    final Options options = new Options().setCreateIfMissing(true).setWriteBufferSize(5096);
     db = RocksDB.open(options, dbpath);
     logger.info("Fresh DB created {} at path {}", db, dbpath);
     return db;
@@ -278,17 +320,25 @@ public class RocksDbStore
   {
     String fileName = hdfsFilePpth.getName();
     Path inLocal = new Path(dbpath);//Local system path
-    hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
+      File[] files  = getFileList(fileName);
+    for(File e :files){
+      System.out.println("file from hdfs : "+e);
+      Path  p = new Path(hdfsFilePpth+"/"+e);
+      hdfs.copyToLocalFile(p, inLocal);
+      System.out.println(" "+e+" copied");
+    }
+
+    //hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
     logger.info("Copied from hdfs to local {} ");
     logger.info("inLOCal path {} ",inLocal);
-    unzip(inLocal + "/" + fileName, inLocal.toString()); //unziping the required file in local
+    //unzip(inLocal + "/" + fileName, inLocal.toString()); //unziping the required file in local
 
     //after unzipping,delete the zip file
-    Path del = new Path(dbpath + "/" + fileName);
+    /*Path del = new Path(dbpath + "/" + fileName);
     File index2 = new File(String.valueOf(del));
     logger.info("");
     index2.delete();
-
+    */
     db = RocksDB.open(dbpath);//opening the DB after the system restarts
     /*ri=db.newIterator();
     ri.

@@ -132,11 +132,11 @@ public class AggregationOperator extends BaseOperator implements Operator.Checkp
     @Override
     public void committed(long windowId)
     {
-        try {
+        /*try {
             DBstore.deleteOlderCheckpoints(operatorId, windowId);
         } catch (IOException ex) {
             logger.error("Error while deleting old checkpoints {}", ex);
-        }
+        }*/
     }
 
     @Override
