@@ -44,9 +44,7 @@ public abstract class DedupOperator extends BaseOperator implements Operator.Che
 
   private RocksDbStore DBstore = new RocksDbStore();
   long operatorId;
-
   public abstract byte[] getKey(Object o);
-
   protected void processTuple(Object o) throws RocksDBException
   {
     byte[] key = getKey(o);
@@ -62,7 +60,6 @@ public abstract class DedupOperator extends BaseOperator implements Operator.Che
       duplicateData.emit(o);
     }
   }
-
   @Override
   public void setup(Context.OperatorContext context)
   {
@@ -81,9 +78,13 @@ public abstract class DedupOperator extends BaseOperator implements Operator.Che
     super.teardown();
     DBstore.closeDB();
   }
+
   @Override
   public void beforeCheckpoint(long windowId)
   {
+    logger.info("total uniques : {}",totalUnique);
+    logger.info("total duplicates : {}",totalDedups);
+
     logger.info("Before Checkpoint {} windowId = {}", db.getSnapshot(), windowId);
     try {
       DBstore.zipAndSend(operatorId, windowId); //zipping db and pushing into hdfs

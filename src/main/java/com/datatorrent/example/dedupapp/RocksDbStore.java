@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.hadoop.fs.*;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -24,9 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 import com.datatorrent.api.Context;
 
@@ -44,6 +44,8 @@ public class RocksDbStore
   private static transient Logger logger = getLogger(AdDataDeduper.class);
   RocksIterator ri;
   int count=0;
+  String hdfsBackupPath;
+
   public void setHdfspath(String s)
   {
     this.hdfspath = (s);
@@ -58,20 +60,42 @@ public class RocksDbStore
   public static File[] getFileList(String dirPath)
   {
     File dir = new File(dirPath);
+    logger.info("inside getfilelist");
     File[] fileList = dir.listFiles();
     return fileList;
   }
 
+
+  public static FileStatus[] getFileListFromHDFS(Path dirPath) throws IOException {
+
+
+      Configuration conf = new Configuration();
+      FileSystem fs = null;
+      try {
+          fs = FileSystem.get(new URI(String.valueOf(dirPath)), conf);
+      } catch (IOException e) {
+          e.printStackTrace();
+      } catch (URISyntaxException e) {
+          e.printStackTrace();
+      }
+      FileStatus[] fileStatus = fs.listStatus(dirPath);
+      for(FileStatus status : fileStatus){
+       logger.info("found {}",status.getPath().toString());
+
+    }
+      return fileStatus;
+  }
+
   public void zipAndSend(long operatorId, long windowId) throws IOException
   {
-    List<File> newFiles = incremental_backup();
-    LOG.info("new files {}", newFiles);
+    List<File> newFiles = incremental_backup(windowId);
+    LOG.info("new files {}", newFiles);                     //GET
     copyFile(operatorId, windowId, newFiles);
    // zipAndSend(operatorId, windowId, newFiles);//(DONT UNCOMMENT THIS)
     //zipAndSenD(operatorId,windowId);
   }
 
-  /*public void zipAndSenD(long operatorId, long windowId) throws IOException
+  public void zipAndSenD(long operatorId, long windowId) throws IOException
   {
     FileSystem hdfs = FileSystem.get(new Configuration());
     Path homeDir = hdfs.getHomeDirectory();
@@ -108,7 +132,7 @@ public class RocksDbStore
     hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
     localZipFile.delete();
   }
-*/
+
   /*
   public void zipAndSend(long operatorId, long windowId, List<File> fileList) throws IOException
   {
@@ -149,13 +173,25 @@ public class RocksDbStore
 */
   Map<String, Long> fileTimeStampMap = new HashMap<>();
 
-  public List<File> incremental_backup()
-  {
+  public List<File> incremental_backup(long windowId) throws IOException {
     List<File> newFiles = new ArrayList<>();
     File[] files = getFileList(dbpath);
     for (File file : files) {
       Long lastTimestamp = fileTimeStampMap.get(file.getName());
       if (lastTimestamp == null) {
+          if(file.getName().startsWith("MANIFEST")){
+              logger.info("file name {}",file.getName());
+              deleteOPTorManifest("MANIFEST");
+          }
+          else if(file.getName().startsWith("OPTIONS")){
+            logger.info("file name {}",file.getName());
+            deleteOPTorManifest("OPTIONS");
+          }
+          else if(file.getName().startsWith(".")){
+            logger.info("file name {}",file.getName());
+            deleteOPTorManifest(".");
+          }
+
         LOG.info("new file {}", file.getName());
         newFiles.add(file);
         fileTimeStampMap.put(file.getName(), file.lastModified());
@@ -167,10 +203,51 @@ public class RocksDbStore
         fileTimeStampMap.put(file.getName(), file.lastModified());
       }
     }
+
+
+
     return newFiles;
   }
 
-  private void copyFile(long operatorId, long wid, List<File> files) throws IOException
+    private void deleteOPTorManifest(String name) throws IOException {
+
+
+        logger.info("{} has to be deleted ",name);
+        Path hdfsBackupPath = new Path(this.hdfsBackupPath);
+
+        Configuration conf = new Configuration();
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(new URI(String.valueOf(hdfsBackupPath)), conf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        logger.info("path is {}",hdfsBackupPath);
+        File check  =  new File(String.valueOf(hdfsBackupPath));
+        logger.info("check {}",fs.exists(hdfsBackupPath));
+
+        if(fs.exists(hdfsBackupPath)){
+        //if(hdfsBackupPath!=null){
+
+          FileStatus[] files  = getFileListFromHDFS(hdfsBackupPath);
+          logger.info("second time i should be here {}",files.length);
+            for (FileStatus file : files) {
+                logger.info("files in  h d f s {}",file.getPath());
+                logger.info("file name checked for {}",file.getPath());
+                if (file.getPath().getName().startsWith(name)) {
+                    logger.info("delete this : {}", file.getPath());
+                    fs.delete(file.getPath(), false);
+                }
+            }
+        }
+
+
+    }
+
+    private void copyFile(long operatorId, long wid, List<File> files) throws IOException
   {
     FileSystem hdfs = FileSystem.get(new Configuration());
     Path homeDir = hdfs.getHomeDirectory();
@@ -188,7 +265,7 @@ public class RocksDbStore
     }
   }
 
-  /*private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
+  private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
   {
     System.out.println("in extract file path :" + filePath);
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
@@ -200,8 +277,8 @@ public class RocksDbStore
     }
     bos.close();
   }
-*/
-  /*
+
+
   public void unzip(String zipFilePath, String destDirectory) throws IOException
   {
     System.out.println("dest directory : " + destDirectory);
@@ -223,7 +300,7 @@ public class RocksDbStore
           System.out.println("If f exists");
           extractFile(zipIn, f);
         }*/
-/*        extractFile(zipIn, f);
+        extractFile(zipIn, f);
       }
 
       System.out.println("entry : " + entry.getName());
@@ -232,13 +309,13 @@ public class RocksDbStore
     }
     zipIn.close();
   }
-*/
+
   public String setLocalPath(Context context)
   {
 
     return context.getValue(Context.DAGContext.APPLICATION_ID);
   }
-
+//Path hdfsBackupPath;
   public RocksDB setDBandFetch(Context.OperatorContext context)
   {
     long operatorId = context.getId();
@@ -255,6 +332,8 @@ public class RocksDbStore
       hdfs = FileSystem.get(new Configuration());
       Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
           Long.toString(operatorId));
+
+      this.hdfsBackupPath=String.valueOf(hdfsBackupPath);
       logger.info("HDFS backup path is {}", hdfsBackupPath);
       exists = hdfs.exists(hdfsBackupPath);
 
@@ -266,12 +345,12 @@ public class RocksDbStore
 
 
       long ac = context.getValue(Context.OperatorContext.ACTIVATION_WINDOW_ID);
-      //Path p = new Path(hdfsBackupPath, "");
+      //Path p = new Path(hdfsBackupPath, "checkpoint_" +ac+".zip");
       System.out.println("path "+hdfsBackupPath);
-      logger.info("Activation checkpoint file path {}", hdfsBackupPath);
+      logger.info("Activation checkpoint file path {}",hdfsBackupPath);
       if (hdfs.exists(hdfsBackupPath)) {
-
-        return loadFromHDSFile(hdfs, hdfsBackupPath);
+         logger.info("in if: {}",hdfsBackupPath);
+        return loadFromHDSFile(hdfs,hdfsBackupPath);
       } else {
         FileStatus[] files = hdfs.listStatus(hdfsBackupPath);
         Path latestFile = null;
@@ -320,12 +399,21 @@ public class RocksDbStore
   {
     String fileName = hdfsFilePpth.getName();
     Path inLocal = new Path(dbpath);//Local system path
-      File[] files  = getFileList(fileName);
-    for(File e :files){
-      System.out.println("file from hdfs : "+e);
-      Path  p = new Path(hdfsFilePpth+"/"+e);
-      hdfs.copyToLocalFile(p, inLocal);
-      System.out.println(" "+e+" copied");
+      logger.info("inlocal path {}",inLocal);
+      logger.info("filename in loadHdfsFile {}",String.valueOf(hdfsFilePpth));
+       FileStatus[] files  = getFileListFromHDFS(hdfsFilePpth);
+      logger.info("files {}",files);
+    for(FileStatus e :files){
+      if(!e.isDirectory()) {
+        System.out.println("file from hdfs : " + e.getPath());                //GET
+        //Path  p = new Path(hdfsFilePpth+"/"+e);
+        hdfs.copyToLocalFile(false,e.getPath(), inLocal,true);
+        logger.info("inside loop : inlocal {}", inLocal);
+        System.out.println(" " + e + " copied");
+      }
+      else{
+        logger.info("hiiiii");
+      }
     }
 
     //hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
@@ -337,8 +425,8 @@ public class RocksDbStore
     /*Path del = new Path(dbpath + "/" + fileName);
     File index2 = new File(String.valueOf(del));
     logger.info("");
-    index2.delete();
-    */
+    index2.delete();*/
+
     db = RocksDB.open(dbpath);//opening the DB after the system restarts
     /*ri=db.newIterator();
     ri.
