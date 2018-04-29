@@ -82,10 +82,6 @@ public class RockdbStoreOperator extends BaseOperator implements Operator.Checkp
   @Override
   public void committed(long windowId)
   {
-//    try {
-//      DBstore.deleteOlderCheckpoints(operatorId, windowId);
-//    } catch (IOException ex) {
-//      LOG.error("Error while deleting old checkpoints {}", ex);
-//    }
+
   }
 }

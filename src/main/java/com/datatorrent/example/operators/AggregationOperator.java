@@ -123,6 +123,7 @@ public class AggregationOperator extends BaseOperator implements Operator.Checkp
         logger.info("Before Checkpoint {} windowId = {}", db.getSnapshot(), windowId);
         try {
             DBstore.zipAndSend(operatorId, windowId); //zipping db and pushing into hdfs
+
         } catch (IOException e) {
             logger.error("Error while taking checkpoint {}", e);
             throw new RuntimeException(e);
@@ -132,11 +133,11 @@ public class AggregationOperator extends BaseOperator implements Operator.Checkp
     @Override
     public void committed(long windowId)
     {
-        /*try {
-            DBstore.deleteOlderCheckpoints(operatorId, windowId);
-        } catch (IOException ex) {
-            logger.error("Error while deleting old checkpoints {}", ex);
-        }*/
+        try {
+            DBstore.current_stat(operatorId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

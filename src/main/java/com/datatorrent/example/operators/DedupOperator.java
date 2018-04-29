@@ -97,11 +97,11 @@ public abstract class DedupOperator extends BaseOperator implements Operator.Che
   @Override
   public void committed(long windowId)
   {
-    /*try {
-      DBstore.deleteOlderCheckpoints(operatorId, windowId);
-    } catch (IOException ex) {
-      logger.error("Error while deleting old checkpoints {}", ex);
-    }*/
+    try {
+      DBstore.current_stat(operatorId);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

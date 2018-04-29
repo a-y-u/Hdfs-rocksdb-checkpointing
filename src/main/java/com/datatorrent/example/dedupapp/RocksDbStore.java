@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -89,88 +86,12 @@ public class RocksDbStore
   public void zipAndSend(long operatorId, long windowId) throws IOException
   {
     List<File> newFiles = incremental_backup(windowId);
-    LOG.info("new files {}", newFiles);                     //GET
+    LOG.info("new files {}", newFiles);
     copyFile(operatorId, windowId, newFiles);
-   // zipAndSend(operatorId, windowId, newFiles);//(DONT UNCOMMENT THIS)
-    //zipAndSenD(operatorId,windowId);
+
   }
 
-  public void zipAndSenD(long operatorId, long windowId) throws IOException
-  {
-    FileSystem hdfs = FileSystem.get(new Configuration());
-    Path homeDir = hdfs.getHomeDirectory();
 
-
-    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
-            Long.toString(operatorId));
-    Path hdfsCheckpointFilePath = new Path(hdfsBackupPath, "checkpoint_" + windowId + ".zip");
-    logger.info("HDFS checkpoint file path {}", hdfsCheckpointFilePath);
-    File[] fileList = getFileList(dbpath);
-
-    File localZipFile = new File(dbpath + "/checkpoint_" + windowId + ".zip");//creates a new file for checkpoint
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(localZipFile));
-    byte[] buffer = new byte[1024];
-
-    for (File file : fileList) {
-      System.out.println("file name ?"+file.getName());
-
-      ZipEntry e = new ZipEntry(String.valueOf(file.getName())); //to get only file
-
-      out.putNextEntry(e);  //zipping each file inside db
-      FileInputStream in = new FileInputStream(file);
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);  //writing to the zip entries else file_size=0
-      }
-      in.close();
-      out.closeEntry();
-
-    }
-    out.close();
-    Path zipPath = new Path(localZipFile.getAbsolutePath());
-    logger.info("copy from {} to {}", zipPath, hdfsCheckpointFilePath);
-    hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
-    localZipFile.delete();
-  }
-
-  /*
-  public void zipAndSend(long operatorId, long windowId, List<File> fileList) throws IOException
-  {
-    FileSystem hdfs = FileSystem.get(new Configuration());
-    Path homeDir = hdfs.getHomeDirectory();
-
-    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
-      Long.toString(operatorId));
-    Path hdfsCheckpointFilePath = new Path(hdfsBackupPath, "checkpoint_" + windowId + ".zip");
-    logger.info("HDFS checkpoint file path {}", hdfsCheckpointFilePath);
-
-    File localZipFile = new File(dbpath + "/checkpoint_" + windowId + ".zip");//creates a new file for checkpoint
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(localZipFile));
-    byte[] buffer = new byte[32 * 1024];
-
-    for (File file : fileList) {
-      System.out.println("file name ?"+file.getName());
-      ZipEntry e = new ZipEntry(String.valueOf(file.getName())); //to get only file
-      out.putNextEntry(e);  //zipping each file inside db
-      try {
-        FileInputStream in = new FileInputStream(file);
-        int len;
-        while ((len = in.read(buffer)) > 0) {
-          out.write(buffer, 0, len);  //writing to the zip entries else file_size=0
-        }
-        in.close();
-      } catch (Exception ex) {
-        LOG.error("Ignoreing file {}", file.getName());
-      }
-      out.closeEntry();
-    }
-    out.close();
-    Path zipPath = new Path(localZipFile.getAbsolutePath());
-    logger.info("copy from {} to {}", zipPath, hdfsCheckpointFilePath);
-    hdfs.copyFromLocalFile(zipPath, hdfsCheckpointFilePath); //copy zip file from local to hdfs
-    localZipFile.delete();
-  }
-*/
   Map<String, Long> fileTimeStampMap = new HashMap<>();
 
   public List<File> incremental_backup(long windowId) throws IOException {
@@ -230,7 +151,7 @@ public class RocksDbStore
         logger.info("check {}",fs.exists(hdfsBackupPath));
 
         if(fs.exists(hdfsBackupPath)){
-        //if(hdfsBackupPath!=null){
+
 
           FileStatus[] files  = getFileListFromHDFS(hdfsBackupPath);
           logger.info("second time i should be here {}",files.length);
@@ -265,57 +186,13 @@ public class RocksDbStore
     }
   }
 
-  private void extractFile(ZipInputStream zipIn, File filePath) throws IOException
-  {
-    System.out.println("in extract file path :" + filePath);
-    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-
-    byte[] bytesIn = new byte[BUFFER_SIZE];
-    int read = 0;
-    while ((read = zipIn.read(bytesIn)) != -1) {
-      bos.write(bytesIn, 0, read);
-    }
-    bos.close();
-  }
-
-
-  public void unzip(String zipFilePath, String destDirectory) throws IOException
-  {
-    System.out.println("dest directory : " + destDirectory);
-    File destDir = new File(destDirectory);
-    if (!destDir.exists()) {
-      destDir.mkdir();
-    }
-    System.out.println("zip file copied here " + zipFilePath);
-    ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
-    ZipEntry entry = zipIn.getNextEntry();
-    while (entry != null) {
-      String filePath = destDirectory + "/"+entry.getName();
-      //String filePath = destDirectory;
-      System.out.println("inside while loop: " + filePath);
-      if (!entry.isDirectory()) {
-        System.out.println("inside if loop");
-        File f = new File(filePath);
-       /* if (f.exists()) {
-          System.out.println("If f exists");
-          extractFile(zipIn, f);
-        }*/
-        extractFile(zipIn, f);
-      }
-
-      System.out.println("entry : " + entry.getName());
-      zipIn.closeEntry();
-      entry = zipIn.getNextEntry();
-    }
-    zipIn.close();
-  }
 
   public String setLocalPath(Context context)
   {
 
     return context.getValue(Context.DAGContext.APPLICATION_ID);
   }
-//Path hdfsBackupPath;
+
   public RocksDB setDBandFetch(Context.OperatorContext context)
   {
     long operatorId = context.getId();
@@ -345,7 +222,6 @@ public class RocksDbStore
 
 
       long ac = context.getValue(Context.OperatorContext.ACTIVATION_WINDOW_ID);
-      //Path p = new Path(hdfsBackupPath, "checkpoint_" +ac+".zip");
       System.out.println("path "+hdfsBackupPath);
       logger.info("Activation checkpoint file path {}",hdfsBackupPath);
       if (hdfs.exists(hdfsBackupPath)) {
@@ -405,37 +281,15 @@ public class RocksDbStore
       logger.info("files {}",files);
     for(FileStatus e :files){
       if(!e.isDirectory()) {
-        System.out.println("file from hdfs : " + e.getPath());                //GET
-        //Path  p = new Path(hdfsFilePpth+"/"+e);
+        System.out.println("file from hdfs : " + e.getPath());
+
         hdfs.copyToLocalFile(false,e.getPath(), inLocal,true);
         logger.info("inside loop : inlocal {}", inLocal);
         System.out.println(" " + e + " copied");
       }
-      else{
-        logger.info("hiiiii");
-      }
+
     }
-
-    //hdfs.copyToLocalFile(hdfsFilePpth, inLocal); //copying from HDFS to local
-    logger.info("Copied from hdfs to local {} ");
-    logger.info("inLOCal path {} ",inLocal);
-    //unzip(inLocal + "/" + fileName, inLocal.toString()); //unziping the required file in local
-
-    //after unzipping,delete the zip file
-    /*Path del = new Path(dbpath + "/" + fileName);
-    File index2 = new File(String.valueOf(del));
-    logger.info("");
-    index2.delete();*/
-
     db = RocksDB.open(dbpath);//opening the DB after the system restarts
-    /*ri=db.newIterator();
-    ri.
-    for(ri.seekToFirst();ri.isValid();ri.next())
-    count++;
-
-    System.out.println("number of keys :"+count);
-*/
-
     return db;
   }
 
@@ -459,16 +313,31 @@ public class RocksDbStore
     }
   }
 
-  public void deleteOlderCheckpoints(long operatorId, long windowId) throws IOException
-  {
-    FileSystem hdfs = FileSystem.get(new Configuration());
-    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath),
-      Long.toString(operatorId));
-    FileStatus[] files = hdfs.listStatus(hdfsBackupPath);
-    for (FileStatus file : files) {
-      long wid = getWidFromFilePath(file);
-      if (wid < windowId) {
-        hdfs.delete(file.getPath());
+  public void current_stat(long operatorId) throws IOException {
+    FileSystem hdfs = null;
+    hdfs = FileSystem.get(new Configuration());
+    Path hdfsBackupPath = new Path(new Path(hdfs.getHomeDirectory(), hdfspath), Long.toString(operatorId));
+    File[] files = getFileList(dbpath);
+    ArrayList<String> fileInLocal = new ArrayList<String>();
+    for(File e1 : files){
+      fileInLocal.add(e1.getName());
+    }
+    logger.info("files in local {}",fileInLocal);
+
+
+    FileStatus[] fileStatuses = getFileListFromHDFS(hdfsBackupPath);
+    ArrayList<String> fileInHdfs = new ArrayList<String>();
+    for(FileStatus e : fileStatuses){
+      fileInHdfs.add(e.getPath().getName());
+    }
+
+    logger.info("files in hdfs {}",fileInHdfs);
+
+    for(FileStatus e : fileStatuses){
+      if(!fileInLocal.contains(e.getPath().getName())){
+
+        hdfs.delete(e.getPath());
+        logger.info("deleted {}",e);
       }
     }
   }
